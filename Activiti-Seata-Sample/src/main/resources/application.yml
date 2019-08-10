@@ -1,0 +1,59 @@
+# 端口号
+server:
+  port: 8882
+
+#监控
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ["*"]
+
+spring:
+  application: 
+    name: activiti-sample
+  aop: 
+    auto: false
+  activiti: 
+    check-process-definitions: false
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/srment6?user=wanglq&password=ijgwhvbw&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8
+    hikari:
+      maximum-pool-size: 200
+      minimum-idle: 10
+  cloud:
+    ##基于consul注册中心的配置
+    consul:
+      host: 192.168.1.232
+      port: 8500
+      discovery:
+        prefer-ip-address: true
+        ip-address: 192.168.0.55
+        port: ${SERVER_PORT:${server.port}}
+        ##这个配置必须配置为true 否则consul会将服务认为不健康服务，导致无法正常路由
+        heartbeat:
+          enabled: true
+        health-check-path: /health
+        health-check-interval: 15s
+        instance-id: activiti-sample-${server.port}
+        service-name: activiti-sample
+
+sqlmapper:
+  show-sql: true
+
+# 这个很重要，处理Forwarding error异常
+hystrix: 
+  command: 
+    default: 
+      execution:  
+        isolation:  
+          thread:   
+            timeoutInMilliseconds: 150000000 #断路器的超时时间,断路器的超时时间需要大于ribbon的超时时间，不然不会触发重试。
+# ribbon
+ribbon:
+  ConnectTimeout: 8800000 #ribbon请求连接的超时时间
+  ReadTimeout: 8800000 #请求处理的超时时间
+  OkToRetryOnAllOperations: true #对所有操作请求都进行重试
+  MaxAutoRetries: 0 #对当前实例的重试次数
+  MaxAutoRetriesNextServer: 0 #对下个实例的重试次数
